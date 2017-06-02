@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 """ Paired end barcode splitter
 
-Splits one fastq file based on barcodes from another file. The script 
+Splits one fastq file based on barcodes from another file. The script
 accepts one barcode index file, one sample sheet, and a set of fastq files.
 The fastq files are assumed to be read1 (the barcode), and the script replaces
 "_R1_" with "_R2_" to find the second file. If the filename ends in `gz` it
@@ -22,14 +22,15 @@ from multiprocessing.pool import ThreadPool
 from HTSeq import FastqReader, SequenceWithQualities
 from Bio import Seq
 
-FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
+#FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
+FN_SCHEME = "{0.project}{0.series}_{0.flocell}_{0.il_barcode}_{0.lane}_R1_001_{0.label}.fastq"
 FN_UNKNOWN = "undetermined_{0}.fastq"
 
 logger = getLogger('pijp.bc_demultiplex')
 debug, info = logger.debug, logger.info
 
 def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_bc_quality, umi_length=0, bc_length=8, cut_length=35):
-    """ this is the main function of this module. Does the splitting 
+    """ this is the main function of this module. Does the splitting
         and calls any other function.
     """
     cut_length = int(cut_length)
@@ -42,23 +43,23 @@ def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_b
         for fastq_file in input_files:
             logger.info("splitting file %s", fastq_file)
             r1_file = fastq_file
-        
+
             # derive lane and il_barcode from filename
             split_name = os.path.basename(fastq_file).split("_")
-            il_barcode = split_name[0]
-            lane = split_name[2]
-    
+            il_barcode = split_name[2]
+            lane = split_name[3]
+
             # run the splitter on this file, and collect the counts
             sample_counter += bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode, r1_file , int(umi_length), int(bc_length), cut_length)
-    
+
         ### Create the stats file.
         total = sum(sample_counter.values())
         stats = [["# Sample_id", "reads", "precentage"]]
-        
+
         # a sample can appear more than once in the sample dict,
-        # but we do not want to use set as it is unordered. 
+        # but we do not want to use set as it is unordered.
         samples = OrderedDict(((x, True) for x in sample_dict.values()))
-        
+
         for sample in samples.keys():
             sample_count = sample_counter[sample]
             stats.append( [FN_SCHEME.format(sample), sample_count, 100.0*sample_count/total])
@@ -68,7 +69,7 @@ def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_b
         with open(os.path.join(output_dir,stats_file), "w") as stats_fh:
             stats_writer = csv.writer(stats_fh, delimiter='\t')
             stats_writer.writerows(stats)
-    finally:        
+    finally:
         for file in files_dict.values():
             file.close()
 
@@ -83,7 +84,7 @@ def create_output_files(sample_dict, target):
     filename = os.path.join(target, FN_UNKNOWN.format('R2'))
     files_dict['unknown_bc_R2'] = open(filename, "wb")
     return files_dict
-    
+
 def create_sample_dict(sample_sheet_file):
     """  Create a mapping from sample keys to sample infos """
     sample_dict = OrderedDict()
@@ -94,11 +95,11 @@ def create_sample_dict(sample_sheet_file):
     with open(sample_sheet_file, 'rb') as sample_sheet_fh:
         sample_sheet_reader = csv.DictReader(sample_sheet_fh, delimiter='\t')
         for row in sample_sheet_reader:
-            id = "{0:04}".format(int(row["#id"]))  #  id has an extra "#" becaues its the first field
+            sid = "{0:04}".format(int(row["#id"]))  #  id has an extra "#" becaues its the first field
             key = Key(row["flocell"], row["lane"], row["il_barcode"], row["cel_barcode"])
-            sample_dict[key] = Sample_info(id, row["series"], row["project"])
+            sample_dict[key] = Sample_info(sid, row["series"], row["project"])
 
-    return sample_dict                              
+    return sample_dict
 
 def create_bc_dict(bc_index_file):
     """ create a mapping from barcode sequence to barcode id """
@@ -157,7 +158,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
                 ### ADD UMIs to the read name
                 if umi_length == 0 :
                     name = read2.name
-                else: 
+                else:
                     ###  According to the SAM format specs, spaces are not allowed.
                     ###  Bowtie only keeps the first part, so the umi must be there.
                     name = read2.name.split()[0] + ':UMI:%s:' % read1.seq[umi_strt:umi_end]
@@ -178,10 +179,10 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             sample_counter['unqualified'] +=1
     return sample_counter
 
-                
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= __doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--min-bc-quality', metavar='N', type=int, default=10, 
+    parser.add_argument('--min-bc-quality', metavar='N', type=int, default=10,
                         help='Minimal quality for barcode reads (default=10)')
     parser.add_argument('--out-dir', metavar='DIRNAME', type=str, default='.',
                         help='Output directory. Defaults to current directory')
@@ -193,4 +194,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main(args.bc_index, args.sample_sheet, args.fastq_files, stats_file=args.stats_file,
          output_dir=args.out_dir, min_bc_quality=args.min_bc_quality)
-
