@@ -35,12 +35,12 @@ def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_b
     """
     cut_length = int(cut_length)
     bc_dict = create_bc_dict(bc_index_file)
-    print(bc_dict)
+    #print(bc_dict)
     sample_dict = create_sample_dict(sample_sheet)
-    print(sample_dict)
+    #print(sample_dict)
     files_dict = create_output_files(sample_dict, output_dir)
-    print(files_dict)
-    return(1)
+    #print(files_dict)
+    #return(1)
 
     try:
         sample_counter = Counter()
@@ -144,6 +144,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
         if len(read1.qual) < umibc:
             sample_counter['unqualified'] +=1
             ### skip to next iteration of loop!
+            print("Length fail")
             continue
         # check quality:
         quals = read1.qual[:(umibc)]
@@ -172,6 +173,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
 
                 sample_counter[sample] += 1
             else:
+                print("Sample fail")
                 bc = read1.seq[bc_strt:bc_end]
                 fh1 = files_dict['unknown_bc_R1']
                 read1.write_to_fastq_file( fh1)
@@ -180,7 +182,11 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
 
                 sample_counter['undetermined'] += 1
         else:
+            print("Qual fail")
             sample_counter['unqualified'] +=1
+
+        if(n >= 10):
+            return(sample_counter)
     return sample_counter
 
 
