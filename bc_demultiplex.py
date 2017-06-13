@@ -127,7 +127,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
     umibc = umi_length + bc_length
     freader1 = FastqReader(r1_file)
     r1 = freader1
-    assert ("_R1" in r1_file), "File name does not contain R1. Aborting"
+    assert ("_R1" in r1_file), "File name ["+r1_file+"] does not contain R1. Aborting"
     r2_file = r1_file.replace("_R1", "_R2")
     assert (r1_file != r2_file), "Couldn't find R2"
     r2 = FastqReader(r2_file)
