@@ -122,13 +122,13 @@ def create_bc_dict(bc_index_file):
 
 def get_sample(sample_dict, bc_dict, read, lane, il_barcode, umi_strt, umi_end, bc_strt, bc_end):
     barcode = str(read.seq[bc_strt:bc_end])
-    print(barcode)
+    #print(barcode)
     cel_bc_id = bc_dict.get(barcode, None)
-    print(cel_bc_id)
+    #print(cel_bc_id)
     flocell = read.name.split(":")[2]
-    print(flocell)
+    #print(flocell)
     key = (flocell, lane, il_barcode, cel_bc_id)
-    print(key)
+    #print(key)
     return sample_dict.get(key ,None)
 
 
@@ -180,7 +180,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
 
                 sample_counter[sample] += 1
             else:
-                #print("Sample fail")
+                print("Sample fail")
                 bc = read1.seq[bc_strt:bc_end]
                 fh1 = files_dict['unknown_bc_R1']
                 read1.write_to_fastq_file( fh1)
