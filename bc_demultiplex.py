@@ -23,7 +23,10 @@ from HTSeq import FastqReader, SequenceWithQualities
 from Bio import Seq
 
 #FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
-FN_SCHEME = "{0.project}{0.series}_{0.flocell}_{0.il_barcode}_{0.lane}_R1_001_{0.label}.fastq"
+#FN_SCHEME = "{0.project}{0.series}_{0.flocell}_{0.il_barcode}_{0.lane}_R1_001_{0.label}.fastq"
+FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
+#Sample(id='0082', series='Cel3', project='AngDJcolonorg'))
+
 FN_UNKNOWN = "undetermined_{0}.fastq"
 
 logger = getLogger('pijp.bc_demultiplex')
