@@ -178,6 +178,8 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             else:
                 print("Sample fail")
                 bc = read1.seq[bc_strt:bc_end]
+                print(bc)
+                print(read1)
                 fh1 = files_dict['unknown_bc_R1']
                 read1.write_to_fastq_file( fh1)
                 fh2 = files_dict['unknown_bc_R2']
@@ -185,9 +187,9 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
 
                 sample_counter['undetermined'] += 1
         else:
-            print("Qual fail")
-            print(quals)
-            print(read1)
+            #print("Qual fail")
+            #print(quals)
+            #print(read1)
             sample_counter['unqualified'] +=1
 
         if(n >= 10):
