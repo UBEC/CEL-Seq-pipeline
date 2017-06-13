@@ -35,8 +35,12 @@ def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_b
     """
     cut_length = int(cut_length)
     bc_dict = create_bc_dict(bc_index_file)
+    print(bc_dict)
     sample_dict = create_sample_dict(sample_sheet)
+    print(sample_dict)
     files_dict = create_output_files(sample_dict, output_dir)
+    print(files_dict)
+    return(1)
 
     try:
         sample_counter = Counter()
