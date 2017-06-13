@@ -147,7 +147,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
         if len(read1.qual) < umibc:
             sample_counter['unqualified'] +=1
             ### skip to next iteration of loop!
-            print("Length fail")
+            # print("Length fail")
             continue
         # check quality:
         quals = read1.qual[:(umibc)]
@@ -186,6 +186,8 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
                 sample_counter['undetermined'] += 1
         else:
             print("Qual fail")
+            print(quals)
+            print(read1)
             sample_counter['unqualified'] +=1
 
         if(n >= 10):
