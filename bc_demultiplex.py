@@ -128,7 +128,7 @@ def get_sample(sample_dict, bc_dict, read, lane, il_barcode, umi_strt, umi_end, 
     flocell = read.name.split(":")[2]
     #print(flocell)
     key = (flocell, lane, il_barcode, cel_bc_id)
-    #print(key)
+    print(key)
     return sample_dict.get(key ,None)
 
 
@@ -138,6 +138,9 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
     umibc = umi_length + bc_length
     freader1 = FastqReader(r1_file)
     r1 = freader1
+
+    print(sample_dict)
+
     assert ("_R1" in r1_file), "File name ["+r1_file+"] does not contain R1. Aborting"
     r2_file = r1_file.replace("_R1", "_R2")
     assert (r1_file != r2_file), "Couldn't find R2"
