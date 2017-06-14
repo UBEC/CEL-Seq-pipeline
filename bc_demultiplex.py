@@ -23,7 +23,7 @@ from HTSeq import FastqReader, SequenceWithQualities
 from Bio import Seq
 
 #FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
-#FN_SCHEME = "{0.project}{0.series}_{0.flocell}_{0.il_barcode}_{0.lane}_R1_001_{0.label}.fastq"
+#FN_SCHEME = "{0.project}{0.series}_{0.flowcell}_{0.il_barcode}_{0.lane}_R1_001_{0.label}.fastq"
 FN_SCHEME = "{0.project}_{0.series}_sample_{0.id}.fastq"
 #Sample(id='0082', series='Cel3', project='AngDJcolonorg'))
 
@@ -61,7 +61,7 @@ def main(bc_index_file, sample_sheet, input_files, stats_file, output_dir, min_b
 
         ### Create the stats file.
         total = sum(sample_counter.values())
-        stats = [["# Sample_id", "reads", "precentage"]]
+        stats = [["# Sample_id", "reads", "percentage"]]
 
         # a sample can appear more than once in the sample dict,
         # but we do not want to use set as it is unordered.
@@ -96,14 +96,14 @@ def create_sample_dict(sample_sheet_file):
     """  Create a mapping from sample keys to sample infos """
     sample_dict = OrderedDict()
     # define the "data types"
-    Key = namedtuple('sample_key',['flocell', 'lane', 'il_barcode', 'cel_barcode'])
+    Key = namedtuple('sample_key',['flowcell', 'lane', 'il_barcode', 'cel_barcode'])
     Sample_info = namedtuple('Sample', ['id', 'series', 'project'])
 
     with open(sample_sheet_file, 'rb') as sample_sheet_fh:
         sample_sheet_reader = csv.DictReader(sample_sheet_fh, delimiter='\t')
         for row in sample_sheet_reader:
             sid = "{0:04}".format(int(row["#id"]))  #  id has an extra "#" becaues its the first field
-            key = Key(row["flocell"], row["lane"], row["il_barcode"], row["cel_barcode"])
+            key = Key(row["flowcell"], row["lane"], row["il_barcode"], row["cel_barcode"])
             sample_dict[key] = Sample_info(sid, row["series"], row["project"])
 
     return sample_dict
@@ -123,8 +123,8 @@ def create_bc_dict(bc_index_file):
 def get_sample(sample_dict, bc_dict, read, lane, il_barcode, umi_strt, umi_end, bc_strt, bc_end):
     barcode = str(read.seq[bc_strt:bc_end])
     cel_bc_id = bc_dict.get(barcode, None)
-    flocell = read.name.split(":")[2]
-    key = (flocell, lane, il_barcode, cel_bc_id)
+    flowcell = read.name.split(":")[2]
+    key = (flowcell, lane, il_barcode, cel_bc_id)
     return sample_dict.get(key ,None)
 
 
