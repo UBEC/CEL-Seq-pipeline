@@ -168,7 +168,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             bc_end = bc_length+umi_length
 
             bc = read1.seq[bc_strt:bc_end]
-            bc_counter[bc] += 1
+            bc_counter[bc] = bc_counter.get(bc, 0) + 1
 
             sample = get_sample(sample_dict, bc_dict, read1, lane, il_barcode, umi_strt, umi_end, bc_strt,bc_end)
             if (sample is not None):
