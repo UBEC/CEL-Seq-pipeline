@@ -136,13 +136,15 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
     r1 = freader1
 
     #print(sample_dict)
+    bc_counter = {key: 0 for key in bc_dict.keys()}
 
     assert ("_R1" in r1_file), "File name ["+r1_file+"] does not contain R1. Aborting"
     r2_file = r1_file.replace("_R1", "_R2")
     assert (r1_file != r2_file), "Couldn't find R2"
     r2 = FastqReader(r2_file)
-    for n, (read1, read2) in enumerate(izip(r1,r2)):
 
+
+    for n, (read1, read2) in enumerate(izip(r1,r2)):
         # validate reads are the same
         assert (read1.name.split()[0] == read2.name.split()[0]), "Reads have different ids. Aborting."
 
@@ -152,6 +154,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             ### skip to next iteration of loop!
             # print("Length fail")
             continue
+
         # check quality:
         quals = read1.qual[:(umibc)]
         if min(quals) >= int(min_bc_quality):
@@ -163,6 +166,10 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             umi_end = umi_length
             bc_strt = umi_length
             bc_end = bc_length+umi_length
+
+            bc = read1.seq[bc_strt:bc_end]
+            bc_counter[bc] += 1
+
             sample = get_sample(sample_dict, bc_dict, read1, lane, il_barcode, umi_strt, umi_end, bc_strt,bc_end)
             if (sample is not None):
                 fh = files_dict[sample]
@@ -179,20 +186,20 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
 
                 sample_counter[sample] += 1
             else:
-                #print("Sample fail")
-                bc = read1.seq[bc_strt:bc_end]
+                # print("Sample fail")
                 fh1 = files_dict['unknown_bc_R1']
-                read1.write_to_fastq_file( fh1)
+                read1.write_to_fastq_file(fh1)
                 fh2 = files_dict['unknown_bc_R2']
-                read2.write_to_fastq_file( fh2)
+                read2.write_to_fastq_file(fh2)
 
                 sample_counter['undetermined'] += 1
         else:
             #print("Qual fail")
             sample_counter['unqualified'] +=1
 
-        #if(n >= 10):
-        #    return(sample_counter)
+        if(n >= 10):
+            print(bc_counter)
+            return(sample_counter)
     return sample_counter
 
 
