@@ -136,7 +136,7 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
     r1 = freader1
 
     #print(sample_dict)
-    bc_counter = {key: 0 for key in bc_dict.keys()}
+    bc_counter = {}
 
     assert ("_R1" in r1_file), "File name ["+r1_file+"] does not contain R1. Aborting"
     r2_file = r1_file.replace("_R1", "_R2")
@@ -197,7 +197,8 @@ def bc_split(bc_dict, sample_dict, files_dict, min_bc_quality, lane, il_barcode,
             #print("Qual fail")
             sample_counter['unqualified'] +=1
 
-        if(n >= 10):
+        if(n >= 100):
+            print(r1_file)
             print(bc_counter)
             return(sample_counter)
     return sample_counter
